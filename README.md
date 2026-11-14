@@ -2,12 +2,14 @@
 
 A console-based Java app for tracking daily student expenses — hostel food, travel, recharge, stationery, and everything in between.
 
-**Status: Week 1 project, in progress (Day 1 of 7 done).**
+**Status: Week 1 project, in progress (Day 2 of 7 done).**
 
 ## Features so far
 - Add an expense with a title, category, and amount
 - View all recorded expenses
 - See the total spent so far
+- Fixed categories (Food, Travel, Recharge, Stationery, Hostel, Entertainment, Other) picked from a list, so no spelling mistakes create duplicate categories
+- Filter expenses by category and see the total for that category
 
 ## Build plan for the week
 | Day | Work |
