@@ -1,15 +1,21 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Week 1 Project - Student Expense Tracker (version 2)
+ * Week 1 Project - Student Expense Tracker (version 3)
  * A console app to record daily expenses, view them, and see the total.
- * Concepts: ArrayList, loops, switch, methods, Scanner input.
+ * Concepts: ArrayList, loops, switch, methods, Scanner input,
+ * file I/O (BufferedReader / BufferedWriter).
  *
  * Build plan for the week:
  * - Day 1: add expense, view all, total
- * - Day 2: categories with filter by category (this version)
- * - Day 3: save and load expenses from a CSV file
+ * - Day 2: categories with filter by category
+ * - Day 3: save and load expenses from a CSV file (this version)
  * - Day 4: monthly summary report
  * - Day 5: input validation and a cleaner menu
  * - Day 6: search and delete an expense
@@ -26,10 +32,14 @@ public class ExpenseTracker {
     private static final ArrayList<Expense> expenses = new ArrayList<>();
     private static int nextId = 1;
 
+    // The file where expenses are saved between runs.
+    private static final String FILE_NAME = "expenses.csv";
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         boolean running = true;
 
+        loadExpenses();
         System.out.println("Welcome to Student Expense Tracker");
 
         while (running) {
@@ -37,7 +47,8 @@ public class ExpenseTracker {
             System.out.println("2. View all expenses");
             System.out.println("3. Show total spent");
             System.out.println("4. Filter expenses by category");
-            System.out.println("5. Exit");
+            System.out.println("5. Save expenses to file");
+            System.out.println("6. Exit");
             System.out.print("Choose an option: ");
             int choice = input.nextInt();
             input.nextLine();
@@ -56,11 +67,15 @@ public class ExpenseTracker {
                     filterByCategory(input);
                     break;
                 case 5:
+                    saveExpenses();
+                    break;
+                case 6:
+                    saveExpenses();
                     running = false;
                     System.out.println("Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid option. Please choose 1 to 5.");
+                    System.out.println("Invalid option. Please choose 1 to 6.");
             }
         }
 
@@ -83,6 +98,7 @@ public class ExpenseTracker {
         nextId++;
         expenses.add(expense);
         System.out.println("Added: " + expense);
+        saveExpenses();
     }
 
     // Shows the numbered category list and returns the chosen category name.
@@ -147,6 +163,48 @@ public class ExpenseTracker {
         } else {
             System.out.printf("Total in %s: Rs. %.2f (%d expense%s)%n",
                     category, categoryTotal, found, found == 1 ? "" : "s");
+        }
+    }
+
+    // Writes every expense as one line in expenses.csv:
+    // id,title,category,amount
+    // Commas inside a title are replaced with a space so the
+    // file always has exactly four fields per line.
+    private static void saveExpenses() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (Expense expense : expenses) {
+                writer.write(expense.toCsvLine());
+                writer.newLine();
+            }
+            System.out.println("Saved " + expenses.size() + " expense(s) to " + FILE_NAME);
+        } catch (IOException e) {
+            System.out.println("Could not save expenses: " + e.getMessage());
+        }
+    }
+
+    // Reads expenses.csv at startup (if it exists) so nothing is lost
+    // between runs. nextId continues after the largest saved id, so
+    // new expenses never reuse an old id.
+    private static void loadExpenses() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            int loaded = 0;
+            while ((line = reader.readLine()) != null) {
+                Expense expense = Expense.fromCsvLine(line);
+                if (expense != null) {
+                    expenses.add(expense);
+                    if (expense.getId() >= nextId) {
+                        nextId = expense.getId() + 1;
+                    }
+                    loaded++;
+                }
+            }
+            if (loaded > 0) {
+                System.out.println("Loaded " + loaded + " expense(s) from " + FILE_NAME);
+            }
+        } catch (IOException e) {
+            // First run: no file yet, so start with an empty list.
+            System.out.println("No saved expenses found. Starting fresh.");
         }
     }
 }
