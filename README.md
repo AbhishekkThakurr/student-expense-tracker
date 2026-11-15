@@ -2,7 +2,7 @@
 
 A console-based Java app for tracking daily student expenses — hostel food, travel, recharge, stationery, and everything in between.
 
-**Status: Week 1 project, in progress (Day 2 of 7 done).**
+**Status: Week 1 project, in progress (Day 3 of 7 done).**
 
 ## Features so far
 - Add an expense with a title, category, and amount
@@ -10,6 +10,7 @@ A console-based Java app for tracking daily student expenses — hostel food, tr
 - See the total spent so far
 - Fixed categories (Food, Travel, Recharge, Stationery, Hostel, Entertainment, Other) picked from a list, so no spelling mistakes create duplicate categories
 - Filter expenses by category and see the total for that category
+- Expenses are saved to `expenses.csv` (after every add, on demand, and on exit) and loaded again when the app starts, so nothing is lost between runs
 
 ## Build plan for the week
 | Day | Work |
@@ -23,10 +24,12 @@ A console-based Java app for tracking daily student expenses — hostel food, tr
 | 7 | Final polish, sample data, complete README |
 
 ## Concepts used
-Classes and objects, ArrayList, loops, switch, methods, Scanner input.
+Classes and objects, ArrayList, loops, switch, methods, Scanner input, file I/O (BufferedReader / BufferedWriter).
 
 ## How to run
 ```bash
 javac Expense.java ExpenseTracker.java
 java ExpenseTracker
 ```
+
+Expenses are stored in `expenses.csv` next to the program — one line per expense (`id,title,category,amount`).
