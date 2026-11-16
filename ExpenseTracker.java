@@ -3,20 +3,25 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 /**
- * Week 1 Project - Student Expense Tracker (version 3)
+ * Week 1 Project - Student Expense Tracker (version 4)
  * A console app to record daily expenses, view them, and see the total.
  * Concepts: ArrayList, loops, switch, methods, Scanner input,
- * file I/O (BufferedReader / BufferedWriter).
+ * file I/O (BufferedReader / BufferedWriter), dates (LocalDate,
+ * YearMonth) and grouping with a Map.
  *
  * Build plan for the week:
  * - Day 1: add expense, view all, total
  * - Day 2: categories with filter by category
- * - Day 3: save and load expenses from a CSV file (this version)
- * - Day 4: monthly summary report
+ * - Day 3: save and load expenses from a CSV file
+ * - Day 4: monthly summary report (this version)
  * - Day 5: input validation and a cleaner menu
  * - Day 6: search and delete an expense
  * - Day 7: final polish, sample data, full README
@@ -48,7 +53,8 @@ public class ExpenseTracker {
             System.out.println("3. Show total spent");
             System.out.println("4. Filter expenses by category");
             System.out.println("5. Save expenses to file");
-            System.out.println("6. Exit");
+            System.out.println("6. Monthly summary report");
+            System.out.println("7. Exit");
             System.out.print("Choose an option: ");
             int choice = input.nextInt();
             input.nextLine();
@@ -70,12 +76,15 @@ public class ExpenseTracker {
                     saveExpenses();
                     break;
                 case 6:
+                    showMonthlySummary();
+                    break;
+                case 7:
                     saveExpenses();
                     running = false;
                     System.out.println("Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid option. Please choose 1 to 6.");
+                    System.out.println("Invalid option. Please choose 1 to 7.");
             }
         }
 
@@ -137,6 +146,77 @@ public class ExpenseTracker {
         System.out.printf("Total spent so far: Rs. %.2f%n", total);
     }
 
+    // Monthly summary report (Day 4): for the current month, shows
+    // how much went to each category, the overall total, the average
+    // expense, and the category where the most money went. Then a
+    // short overview lists every month that has expenses, so the
+    // user can compare months at a glance. A TreeMap keeps the
+    // months in calendar order.
+    private static void showMonthlySummary() {
+        if (expenses.isEmpty()) {
+            System.out.println("No expenses recorded yet.");
+            return;
+        }
+
+        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MMMM yyyy");
+        YearMonth currentMonth = YearMonth.now();
+
+        // Totals for the current month, one entry per category.
+        Map<String, Double> monthCategoryTotals = new TreeMap<>();
+        Map<String, Integer> monthCategoryCounts = new TreeMap<>();
+        double monthTotal = 0;
+        int monthCount = 0;
+
+        // Totals for every month, for the overview at the end.
+        Map<YearMonth, Double> allMonthTotals = new TreeMap<>();
+        Map<YearMonth, Integer> allMonthCounts = new TreeMap<>();
+
+        for (Expense expense : expenses) {
+            YearMonth expenseMonth = YearMonth.from(expense.getDate());
+            allMonthTotals.merge(expenseMonth, expense.getAmount(), Double::sum);
+            allMonthCounts.merge(expenseMonth, 1, Integer::sum);
+
+            if (expenseMonth.equals(currentMonth)) {
+                monthCategoryTotals.merge(expense.getCategory(), expense.getAmount(), Double::sum);
+                monthCategoryCounts.merge(expense.getCategory(), 1, Integer::sum);
+                monthTotal += expense.getAmount();
+                monthCount++;
+            }
+        }
+
+        System.out.println("\n--- Monthly Summary: " + currentMonth.format(monthFormat) + " ---");
+        if (monthCount == 0) {
+            System.out.println("No expenses recorded this month yet.");
+        } else {
+            String topCategory = null;
+            double topTotal = 0;
+            for (Map.Entry<String, Double> entry : monthCategoryTotals.entrySet()) {
+                String category = entry.getKey();
+                double categoryTotal = entry.getValue();
+                int count = monthCategoryCounts.get(category);
+                System.out.printf("%-15s Rs. %8.2f  (%d expense%s)%n",
+                        category, categoryTotal, count, count == 1 ? "" : "s");
+                if (categoryTotal > topTotal) {
+                    topTotal = categoryTotal;
+                    topCategory = category;
+                }
+            }
+            System.out.println("----------------------------------------");
+            System.out.printf("Total this month: Rs. %.2f (%d expense%s)%n",
+                    monthTotal, monthCount, monthCount == 1 ? "" : "s");
+            System.out.printf("Average expense:  Rs. %.2f%n", monthTotal / monthCount);
+            System.out.println("Biggest spending: " + topCategory + " (Rs. " + String.format("%.2f", topTotal) + ")");
+        }
+
+        System.out.println("\n--- All months ---");
+        for (Map.Entry<YearMonth, Double> entry : allMonthTotals.entrySet()) {
+            YearMonth month = entry.getKey();
+            int count = allMonthCounts.get(month);
+            System.out.printf("%-15s Rs. %8.2f  (%d expense%s)%n",
+                    month.format(monthFormat), entry.getValue(), count, count == 1 ? "" : "s");
+        }
+    }
+
     // Shows only the expenses in one category, plus their total,
     // so the user can see where the money is going.
     private static void filterByCategory(Scanner input) {
@@ -167,7 +247,7 @@ public class ExpenseTracker {
     }
 
     // Writes every expense as one line in expenses.csv:
-    // id,title,category,amount
+    // id,title,category,amount,date
     // Commas inside a title are replaced with a space so the
     // file always has exactly four fields per line.
     private static void saveExpenses() {
