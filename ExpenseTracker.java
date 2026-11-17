@@ -11,18 +11,19 @@ import java.util.Scanner;
 import java.util.TreeMap;
 
 /**
- * Week 1 Project - Student Expense Tracker (version 4)
+ * Week 1 Project - Student Expense Tracker (version 5)
  * A console app to record daily expenses, view them, and see the total.
  * Concepts: ArrayList, loops, switch, methods, Scanner input,
  * file I/O (BufferedReader / BufferedWriter), dates (LocalDate,
- * YearMonth) and grouping with a Map.
+ * YearMonth), grouping with a Map, and input validation
+ * (try/catch, NumberFormatException, loops that re-ask).
  *
  * Build plan for the week:
  * - Day 1: add expense, view all, total
  * - Day 2: categories with filter by category
  * - Day 3: save and load expenses from a CSV file
- * - Day 4: monthly summary report (this version)
- * - Day 5: input validation and a cleaner menu
+ * - Day 4: monthly summary report
+ * - Day 5: input validation and a cleaner menu (this version)
  * - Day 6: search and delete an expense
  * - Day 7: final polish, sample data, full README
  */
@@ -48,16 +49,8 @@ public class ExpenseTracker {
         System.out.println("Welcome to Student Expense Tracker");
 
         while (running) {
-            System.out.println("\n1. Add expense");
-            System.out.println("2. View all expenses");
-            System.out.println("3. Show total spent");
-            System.out.println("4. Filter expenses by category");
-            System.out.println("5. Save expenses to file");
-            System.out.println("6. Monthly summary report");
-            System.out.println("7. Exit");
-            System.out.print("Choose an option: ");
-            int choice = input.nextInt();
-            input.nextLine();
+            showMenu();
+            int choice = readInt(input, "Choose an option (1-7): ", 1, 7);
 
             switch (choice) {
                 case 1:
@@ -83,25 +76,93 @@ public class ExpenseTracker {
                     running = false;
                     System.out.println("Goodbye!");
                     break;
-                default:
-                    System.out.println("Invalid option. Please choose 1 to 7.");
             }
         }
 
         input.close();
     }
 
+    // The main menu, printed with a header and a separator so it is
+    // easy to read at a glance. (Day 5)
+    private static void showMenu() {
+        System.out.println();
+        System.out.println("===== Student Expense Tracker =====");
+        System.out.println("  1. Add expense");
+        System.out.println("  2. View all expenses");
+        System.out.println("  3. Show total spent");
+        System.out.println("  4. Filter expenses by category");
+        System.out.println("  5. Save expenses to file");
+        System.out.println("  6. Monthly summary report");
+        System.out.println("  7. Exit");
+        System.out.println("-----------------------------------");
+    }
+
+    // Reads a whole number between min and max. If the user types
+    // letters, a decimal, or a number outside the range, the program
+    // explains the problem and asks again instead of crashing.
+    // (Day 5 - this replaces the old nextInt() calls, which crashed
+    // with InputMismatchException on non-numeric input.)
+    private static int readInt(Scanner input, String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            String line = input.nextLine().trim();
+            try {
+                int value = Integer.parseInt(line);
+                if (value < min || value > max) {
+                    System.out.println("Please enter a number between " + min + " and " + max + ".");
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("That is not a whole number. Please try again.");
+            }
+        }
+    }
+
+    // Reads an amount in Rs. The amount must be a number greater
+    // than zero: letters, zero, and negative amounts are all
+    // rejected with a message, and the user is asked again. (Day 5)
+    private static double readPositiveAmount(Scanner input) {
+        while (true) {
+            System.out.print("Amount in Rs.: ");
+            String line = input.nextLine().trim();
+            try {
+                double amount = Double.parseDouble(line);
+                if (Double.isNaN(amount) || Double.isInfinite(amount)) {
+                    System.out.println("Please enter a real amount.");
+                } else if (amount <= 0) {
+                    System.out.println("Amount must be more than Rs. 0. Please try again.");
+                } else {
+                    return amount;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("That is not a number. Please enter the amount in Rs.");
+            }
+        }
+    }
+
+    // Reads a line of text that must not be blank. A title of only
+    // spaces is rejected and the user is asked again. (Day 5)
+    private static String readNonEmptyLine(Scanner input, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String line = input.nextLine().trim();
+            if (line.isEmpty()) {
+                System.out.println("This cannot be empty. Please type something.");
+            } else {
+                return line;
+            }
+        }
+    }
+
     private static void addExpense(Scanner input) {
-        System.out.print("Title (for example, Lunch): ");
-        String title = input.nextLine();
+        String title = readNonEmptyLine(input, "Title (for example, Lunch): ");
 
         // The user picks a category from the fixed list instead of typing
         // free text, so spelling mistakes cannot create duplicate categories.
         String category = pickCategory(input);
 
-        System.out.print("Amount in Rs.: ");
-        double amount = input.nextDouble();
-        input.nextLine();
+        double amount = readPositiveAmount(input);
 
         Expense expense = new Expense(nextId, title, category, amount);
         nextId++;
@@ -111,19 +172,14 @@ public class ExpenseTracker {
     }
 
     // Shows the numbered category list and returns the chosen category name.
+    // An out-of-range or non-numeric choice is now re-asked instead of
+    // silently falling back to 'Other'. (Day 5)
     private static String pickCategory(Scanner input) {
         System.out.println("Choose a category:");
         for (int i = 0; i < CATEGORIES.length; i++) {
-            System.out.println((i + 1) + ". " + CATEGORIES[i]);
+            System.out.println("  " + (i + 1) + ". " + CATEGORIES[i]);
         }
-        System.out.print("Category number: ");
-        int choice = input.nextInt();
-        input.nextLine();
-
-        if (choice < 1 || choice > CATEGORIES.length) {
-            System.out.println("Invalid choice, using 'Other'.");
-            return "Other";
-        }
+        int choice = readInt(input, "Category number: ", 1, CATEGORIES.length);
         return CATEGORIES[choice - 1];
     }
 
