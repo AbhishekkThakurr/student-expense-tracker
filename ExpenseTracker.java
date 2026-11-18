@@ -11,20 +11,21 @@ import java.util.Scanner;
 import java.util.TreeMap;
 
 /**
- * Week 1 Project - Student Expense Tracker (version 5)
+ * Week 1 Project - Student Expense Tracker (version 6)
  * A console app to record daily expenses, view them, and see the total.
  * Concepts: ArrayList, loops, switch, methods, Scanner input,
  * file I/O (BufferedReader / BufferedWriter), dates (LocalDate,
- * YearMonth), grouping with a Map, and input validation
- * (try/catch, NumberFormatException, loops that re-ask).
+ * YearMonth), grouping with a Map, input validation
+ * (try/catch, NumberFormatException, loops that re-ask), and
+ * searching / removing items from a list.
  *
  * Build plan for the week:
  * - Day 1: add expense, view all, total
  * - Day 2: categories with filter by category
  * - Day 3: save and load expenses from a CSV file
  * - Day 4: monthly summary report
- * - Day 5: input validation and a cleaner menu (this version)
- * - Day 6: search and delete an expense
+ * - Day 5: input validation and a cleaner menu
+ * - Day 6: search and delete an expense (this version)
  * - Day 7: final polish, sample data, full README
  */
 public class ExpenseTracker {
@@ -50,7 +51,7 @@ public class ExpenseTracker {
 
         while (running) {
             showMenu();
-            int choice = readInt(input, "Choose an option (1-7): ", 1, 7);
+            int choice = readInt(input, "Choose an option (1-9): ", 1, 9);
 
             switch (choice) {
                 case 1:
@@ -72,6 +73,12 @@ public class ExpenseTracker {
                     showMonthlySummary();
                     break;
                 case 7:
+                    searchExpenses(input);
+                    break;
+                case 8:
+                    deleteExpense(input);
+                    break;
+                case 9:
                     saveExpenses();
                     running = false;
                     System.out.println("Goodbye!");
@@ -93,7 +100,9 @@ public class ExpenseTracker {
         System.out.println("  4. Filter expenses by category");
         System.out.println("  5. Save expenses to file");
         System.out.println("  6. Monthly summary report");
-        System.out.println("  7. Exit");
+        System.out.println("  7. Search expenses by title");
+        System.out.println("  8. Delete an expense");
+        System.out.println("  9. Exit");
         System.out.println("-----------------------------------");
     }
 
@@ -200,6 +209,75 @@ public class ExpenseTracker {
             total += expense.getAmount();
         }
         System.out.printf("Total spent so far: Rs. %.2f%n", total);
+    }
+
+    // Search expenses by title (Day 6). The match is case-insensitive
+    // and looks for the keyword anywhere inside the title, so "lunch"
+    // finds "Lunch with friends" as well as "Lunch". The search shows
+    // every match plus how many were found.
+    private static void searchExpenses(Scanner input) {
+        if (expenses.isEmpty()) {
+            System.out.println("No expenses recorded yet.");
+            return;
+        }
+
+        String keyword = readNonEmptyLine(input, "Search for (part of a title): ").toLowerCase();
+        int found = 0;
+
+        System.out.println("\nMatching expenses:");
+        for (Expense expense : expenses) {
+            if (expense.getTitle().toLowerCase().contains(keyword)) {
+                System.out.println(expense);
+                found++;
+            }
+        }
+
+        if (found == 0) {
+            System.out.println("No expenses match '" + keyword + "'.");
+        } else {
+            System.out.println("Found " + found + " expense" + (found == 1 ? "" : "s") + ".");
+        }
+    }
+
+    // Delete an expense by its id number (Day 6). The list is shown
+    // first so the user can see the ids. After the user picks an id,
+    // the expense is shown back and deleted only after a "y" confirm,
+    // so a wrong number cannot silently wipe an entry. The file is
+    // saved straight away, so the deleted expense stays gone.
+    private static void deleteExpense(Scanner input) {
+        if (expenses.isEmpty()) {
+            System.out.println("No expenses recorded yet.");
+            return;
+        }
+
+        viewExpenses();
+        int id = readInt(input, "Enter the id of the expense to delete: ", 1, Integer.MAX_VALUE);
+
+        Expense toDelete = null;
+        for (Expense expense : expenses) {
+            if (expense.getId() == id) {
+                toDelete = expense;
+                break;
+            }
+        }
+
+        if (toDelete == null) {
+            System.out.println("No expense with id #" + id + ". Nothing was deleted.");
+            return;
+        }
+
+        System.out.println("You are about to delete: " + toDelete);
+        System.out.print("Delete it? Type y to confirm, anything else to cancel: ");
+        String answer = input.nextLine().trim().toLowerCase();
+
+        if (!answer.equals("y") && !answer.equals("yes")) {
+            System.out.println("Cancelled. Nothing was deleted.");
+            return;
+        }
+
+        expenses.remove(toDelete);
+        saveExpenses();
+        System.out.println("Deleted expense #" + id + ".");
     }
 
     // Monthly summary report (Day 4): for the current month, shows
