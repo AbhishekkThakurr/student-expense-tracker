@@ -2,7 +2,7 @@
 
 A console-based Java app for tracking daily student expenses — hostel food, travel, recharge, stationery, and everything in between.
 
-**Status: Week 1 project, in progress (Day 5 of 7 done).**
+**Status: Week 1 project, in progress (Day 6 of 7 done).**
 
 ## Features so far
 - Add an expense with a title, category, and amount
@@ -14,6 +14,8 @@ A console-based Java app for tracking daily student expenses — hostel food, tr
 - Every expense carries the date it was added, and the monthly summary report shows this month's spending per category, the total, the average expense, the biggest spending category, plus an overview of every month
 - Input validation: typing letters where a number is expected no longer crashes the app — the menu choice, category number, and amount are all re-asked with a clear message; a blank title is rejected, the amount must be more than Rs. 0, and a wrong category number is re-asked instead of silently becoming 'Other'
 - Cleaner menu with a header and separator, so the options are easy to read at a glance
+- Search expenses by part of the title (case-insensitive, so "lunch" finds "Lunch with friends")
+- Delete an expense by its id number, with a confirmation prompt first, and the file is saved straight away so the deleted expense stays gone
 
 ## Build plan for the week
 | Day | Work |
@@ -23,11 +25,11 @@ A console-based Java app for tracking daily student expenses — hostel food, tr
 | 3 | Save and load expenses from a CSV file |
 | 4 | Monthly summary report ✅ |
 | 5 | Input validation and a cleaner menu ✅ |
-| 6 | Search and delete an expense |
+| 6 | Search and delete an expense ✅ |
 | 7 | Final polish, sample data, complete README |
 
 ## Concepts used
-Classes and objects, ArrayList, loops, switch, methods, Scanner input, file I/O (BufferedReader / BufferedWriter), dates (LocalDate, YearMonth), grouping with a Map, and input validation (try/catch, NumberFormatException, re-asking loops).
+Classes and objects, ArrayList, loops, switch, methods, Scanner input, file I/O (BufferedReader / BufferedWriter), dates (LocalDate, YearMonth), grouping with a Map, input validation (try/catch, NumberFormatException, re-asking loops), and searching / removing items from a list.
 
 ## How to run
 ```bash
