@@ -2,9 +2,9 @@
 
 A console-based Java app for tracking daily student expenses — hostel food, travel, recharge, stationery, and everything in between.
 
-**Status: Week 1 project, in progress (Day 6 of 7 done).**
+**Status: Week 1 project, complete (Day 7 of 7 done).**
 
-## Features so far
+## Features
 - Add an expense with a title, category, and amount
 - View all recorded expenses
 - See the total spent so far
@@ -16,17 +16,18 @@ A console-based Java app for tracking daily student expenses — hostel food, tr
 - Cleaner menu with a header and separator, so the options are easy to read at a glance
 - Search expenses by part of the title (case-insensitive, so "lunch" finds "Lunch with friends")
 - Delete an expense by its id number, with a confirmation prompt first, and the file is saved straight away so the deleted expense stays gone
+- View and total screens show the number of expenses, so an empty list is never mistaken for a bug
 
 ## Build plan for the week
 | Day | Work |
-| --- | ---- |
-| 1 | Project setup, Expense model, add / view / total |
-| 2 | Categories with filter by category |
-| 3 | Save and load expenses from a CSV file |
+| --- | ----- |
+| 1 | Project setup, Expense model, add / view / total ✅ |
+| 2 | Categories with filter by category ✅ |
+| 3 | Save and load expenses from a CSV file ✅ |
 | 4 | Monthly summary report ✅ |
 | 5 | Input validation and a cleaner menu ✅ |
 | 6 | Search and delete an expense ✅ |
-| 7 | Final polish, sample data, complete README |
+| 7 | Final polish, sample data, complete README ✅ |
 
 ## Concepts used
 Classes and objects, ArrayList, loops, switch, methods, Scanner input, file I/O (BufferedReader / BufferedWriter), dates (LocalDate, YearMonth), grouping with a Map, input validation (try/catch, NumberFormatException, re-asking loops), and searching / removing items from a list.
@@ -38,3 +39,6 @@ java ExpenseTracker
 ```
 
 Expenses are stored in `expenses.csv` next to the program — one line per expense (`id,title,category,amount,date`). Files saved before Day 4 have no date column and still load fine (their date is read as today).
+
+## Sample data
+`expenses.csv` ships with 12 sample expenses: 10 from November 2026 and 2 from October 2026, so the monthly summary shows this month's breakdown plus an overview of both months. Run the app and try options 2 (view), 3 (total), and 6 (monthly summary) to see it working right away. Adding your own expense saves over the sample file, and deleting the file starts you fresh.
