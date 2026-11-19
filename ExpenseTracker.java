@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.TreeMap;
 
 /**
- * Week 1 Project - Student Expense Tracker (version 6)
+ * Week 1 Project - Student Expense Tracker (version 7, final)
  * A console app to record daily expenses, view them, and see the total.
  * Concepts: ArrayList, loops, switch, methods, Scanner input,
  * file I/O (BufferedReader / BufferedWriter), dates (LocalDate,
@@ -25,8 +25,8 @@ import java.util.TreeMap;
  * - Day 3: save and load expenses from a CSV file
  * - Day 4: monthly summary report
  * - Day 5: input validation and a cleaner menu
- * - Day 6: search and delete an expense (this version)
- * - Day 7: final polish, sample data, full README
+ * - Day 6: search and delete an expense
+ * - Day 7: final polish, sample data, full README (this version)
  */
 public class ExpenseTracker {
 
@@ -201,6 +201,9 @@ public class ExpenseTracker {
         for (Expense expense : expenses) {
             System.out.println(expense);
         }
+        // Day 7 polish: a count at the end, so the list size is
+        // clear without counting the lines by hand.
+        System.out.println("(" + expenses.size() + " expense" + (expenses.size() == 1 ? "" : "s") + ")");
     }
 
     private static void showTotal() {
@@ -208,7 +211,11 @@ public class ExpenseTracker {
         for (Expense expense : expenses) {
             total += expense.getAmount();
         }
-        System.out.printf("Total spent so far: Rs. %.2f%n", total);
+        // Day 7 polish: show the number of expenses next to the
+        // total, so "Rs. 0.00" can never be mistaken for a bug
+        // when the list is simply empty.
+        System.out.printf("Total spent so far: Rs. %.2f (%d expense%s)%n",
+                total, expenses.size(), expenses.size() == 1 ? "" : "s");
     }
 
     // Search expenses by title (Day 6). The match is case-insensitive
@@ -422,3 +429,4 @@ public class ExpenseTracker {
         }
     }
 }
+
